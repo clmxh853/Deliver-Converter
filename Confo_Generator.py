@@ -41,6 +41,24 @@ def setup_logging(log_folder: str = ".") -> Path:
     return log_file
 
 
+def get_paths() -> tuple[str, Path]:
+    """Prompt user for input file and output folder paths with defaults."""
+    default_input = "Confo_Template_test.xlsx"
+    default_output = Path(__file__).parent / "pdf_output"
+
+    input_path = input(f"Input path [{default_input}]: ").strip().strip('"')
+    if not input_path:
+        input_path = default_input
+
+    output_str = input(f"Output path [{default_output}]: ").strip().strip('"')
+    if not output_str:
+        output_folder = default_output
+    else:
+        output_folder = Path(output_str)
+
+    return input_path, output_folder
+
+
 def print_summary(summary: dict):
     """Print and log processing summary"""
 
@@ -73,9 +91,8 @@ def main():
     log_file = setup_logging()
     logger = logging.getLogger(__name__)
 
-    # Configuration
-    INPUT_FILE = "Confo_Template_test.xlsx"
-    OUTPUT_FOLDER = Path(__file__).parent / "pdf_output"
+    # Get paths from user
+    INPUT_FILE, OUTPUT_FOLDER = get_paths()
 
     logger.info("=" * 60)
     logger.info("Trade Confirmation Generator Starting")
@@ -85,7 +102,10 @@ def main():
 
     try:
         # Get absolute path for input file
-        input_path = Path(__file__).parent / INPUT_FILE
+        if Path(INPUT_FILE).is_absolute():
+            input_path = Path(INPUT_FILE)
+        else:
+            input_path = Path(__file__).parent / INPUT_FILE
 
         if not input_path.exists():
             logger.error(f"Input file not found: {input_path}")
